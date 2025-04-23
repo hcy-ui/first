@@ -1,5 +1,5 @@
 #include "stm32f10x.h" // Device header
-#include "pid.h"       // Device header
+#include "TIM2_PID.h"       // Device header
 #include "math.h"
 
 void PID_Update(PID_t *p)
@@ -117,9 +117,35 @@ void Tim2_Init(void)
 /* 定时器中断函数，可以复制到使用它的地方
 void TIM2_IRQHandler(void)
 {
+	static uint16_t Count1, Count2;
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
 	{
+		Count1 ++;
+		if (Count1 >= 40)
+		{
+			Count1 = 0;
+			
+			Speed = Encoder_Get();
+			Location += Speed;
+			
+			Inner.Actual = Speed;
+			
+			PID_Update(&Inner);
+			
+			Motor_SetPWM(Inner.Out);
+		}
 		
+		Count2 ++;
+		if (Count2 >= 40)
+		{
+			Count2 = 0;
+			
+			Outer.Actual = Location;
+			
+			PID_Update(&Outer);
+			
+			Inner.Target = Outer.Out;
+		}
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
 }
