@@ -51,6 +51,7 @@
 ".\objects\buzzer.o"
 ".\objects\exti2_countsensor.o"
 ".\objects\ddelay.o"
+".\objects\track.o"
 ".\objects\main.o"
 ".\objects\stm32f10x_it.o"
 --library_type=microlib --strict --scatter ".\Objects\Project.sct"
