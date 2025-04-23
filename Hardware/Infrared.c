@@ -14,7 +14,7 @@ void Infrared_Init(void)
 uint8_t Infrared_Get(void)
 {
 	uint8_t Temp;
-	Temp=GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_12);
+	Temp=!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_12);
 	return Temp;
 }
 
