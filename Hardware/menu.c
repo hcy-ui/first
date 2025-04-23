@@ -47,6 +47,42 @@ PID_t Outer = {
     .ErrorInt = 0,
 };
 
+void TIM2_IRQHandler(void)
+{
+	static uint16_t Count1, Count2;
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	{
+		Count1 ++;
+		if (Count1 >= 40)
+		{
+			Count1 = 0;
+			
+			Speed = Encoder_Get();
+			Location += Speed;
+			
+			Inner.Actual = Speed;
+			
+			PID_Update(&Inner);
+			
+			Motor_SetPWM(Inner.Out);
+		}
+		
+		Count2 ++;
+		if (Count2 >= 40)
+		{
+			Count2 = 0;
+			
+			Outer.Actual = Location;
+			
+			PID_Update(&Outer);
+			
+			Inner.Target = Outer.Out;
+		}
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	}
+}
+
+
 int Menu1()
 {
     // OLED_Printf(0, 0, OLED_8X16, "电机参数             ");

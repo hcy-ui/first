@@ -28,9 +28,19 @@ Project File Date:  04/23/2025
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\keil5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling menu.c...
-linking...
-Program Size: Code=14580 RO-data=3996 RW-data=184 ZI-data=2096  
-".\Objects\Project.axf" - 0 Error(s), 0 Warning(s).
+Hardware\menu.c(60): error:  #20: identifier "Speed" is undefined
+  			Speed = Encoder_Get();
+Hardware\menu.c(60): warning:  #223-D: function "Encoder_Get" declared implicitly
+  			Speed = Encoder_Get();
+Hardware\menu.c(61): error:  #20: identifier "Location" is undefined
+  			Location += Speed;
+Hardware\menu.c(67): warning:  #223-D: function "Motor_SetPWM" declared implicitly
+  			Motor_SetPWM(Inner.Out);
+Hardware\menu.c(75): error:  #20: identifier "Location" is undefined
+  			Outer.Actual = Location;
+Hardware\menu.c: 2 warnings, 3 errors
+compiling TIM2_PID.c...
+".\Objects\Project.axf" - 3 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -43,6 +53,7 @@ Package Vendor: Keil
   D:/keil5/ARM/PACK/Keil/STM32F1xx_DFP/2.2.0/Device/Include
 
 <h2>Collection of Component Files used:</h2>
+Target not created.
 Build Time Elapsed:  00:00:01
 </pre>
 </body>
