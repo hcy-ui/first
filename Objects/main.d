@@ -46,3 +46,4 @@
 .\objects\main.o: .\Hardware\Key.h
 .\objects\main.o: .\Hardware\menu.h
 .\objects\main.o: .\Hardware\TIM1_PWM.h
+.\objects\main.o: .\Hardware\Infrared.h

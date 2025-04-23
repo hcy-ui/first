@@ -820,16 +820,6 @@
               <FilePath>.\Hardware\MPU6050_I2C.h</FilePath>
             </File>
             <File>
-              <FileName>pid.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\pid.c</FilePath>
-            </File>
-            <File>
-              <FileName>pid.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\pid.h</FilePath>
-            </File>
-            <File>
               <FileName>USART3_WabCam.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\USART3_WabCam.c</FilePath>
@@ -938,6 +928,26 @@
               <FileName>Track.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\Track.h</FilePath>
+            </File>
+            <File>
+              <FileName>Infrared.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Infrared.c</FilePath>
+            </File>
+            <File>
+              <FileName>Infrared.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\Infrared.h</FilePath>
+            </File>
+            <File>
+              <FileName>TIM2_PID.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\TIM2_PID.c</FilePath>
+            </File>
+            <File>
+              <FileName>TIM2_PID.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\TIM2_PID.h</FilePath>
             </File>
           </Files>
         </Group>
