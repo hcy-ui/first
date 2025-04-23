@@ -11,6 +11,11 @@ void Infrared_Init(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
+
+
+/// @brief 检测到障碍，则返回1，否则返回0
+/// @param  无
+/// @return 0/1
 uint8_t Infrared_Get(void)
 {
 	uint8_t Temp;

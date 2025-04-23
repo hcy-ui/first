@@ -13,6 +13,7 @@
 // #include "MPU_EXTI.h"
 // #include "inv_mpu.h"
 #include "TIM1_PWM.h"
+#include "Infrared.h"
 
 // int16_t Speed_Left, Speed_Right, Location;aaa
 int8_t menu2;
@@ -21,6 +22,7 @@ int main(void)
 	OLED_Init();
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);			//开启GPIOA的时钟
 	Key_Init();
+	// Infrared_Init();
 	// MyRTC_Init();
 	// delay_init();
 	// MPU6050_DMP_Init();
