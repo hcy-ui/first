@@ -41,9 +41,10 @@
 .\objects\main.o: .\Hardware\OLED.h
 .\objects\main.o: .\Hardware\OLED_Data.h
 .\objects\main.o: .\Hardware\TIM1_Motor.h
-.\objects\main.o: .\Hardware\Encoder.h
+.\objects\main.o: .\Hardware\TIM2_4_Encoder.h
 .\objects\main.o: .\Hardware\RP.h
 .\objects\main.o: .\Hardware\Key.h
 .\objects\main.o: .\Hardware\menu.h
+.\objects\main.o: .\Hardware\TIM3_PID.h
 .\objects\main.o: .\Hardware\TIM1_PWM.h
 .\objects\main.o: .\Hardware\Infrared.h

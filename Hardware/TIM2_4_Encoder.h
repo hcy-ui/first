@@ -1,5 +1,5 @@
-#ifndef __ENCODER_H
-#define __ENCODER_H
+#ifndef __TIM2_4_ENCODER_H
+#define __TIM2_4_ENCODER_H
 
 void TIM2_Encoder_Init(void);
 void TIM4_Encoder_Init(void);

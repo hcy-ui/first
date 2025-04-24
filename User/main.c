@@ -3,7 +3,7 @@
 #include "DDelay.h"
 #include "OLED.h"
 #include "TIM1_Motor.h"
-#include "Encoder.h"
+#include "TIM2_4_Encoder.h"
 #include "RP.h"
 //#include "Timer3_Blooteeth.h"
 #include "Key.h"
@@ -21,16 +21,15 @@ int main(void)
 {
 	OLED_Init();
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);			//开启GPIOA的时钟
-	Key_Init();
+	// Key_Init();
 	// Infrared_Init();
 	// MyRTC_Init();
 	// delay_init();
 	// MPU6050_DMP_Init();
 	// MPU_EXTI_Init();
-	// Motor_Init();
-	// PWM_Init();
-	// TIM2_Encoder_Init();
-	// TIM4_Encoder_Init();			
+	Motor_Init();
+	TIM2_Encoder_Init();
+	TIM4_Encoder_Init();			
 	// Serial_Init();
 	// RP_Init();
 
@@ -55,15 +54,17 @@ int main(void)
 
 	while (1)
 	{
-		menu2=Menu1();//二级菜单
-		if(menu2==1)	{Menu2_Motor();}
-		if(menu2==2)	{Menu2_PID();}
-		if(menu2==3)	{}
-		if(menu2==4)	{Menu2_MPU6050();}
-		if(menu2==5)	{}
-		if(menu2==6)	{Menu2_Clock();}
-		if(menu2==7)	{}
-		if(menu2==8)	{}
+
+
+		// menu2=Menu1();//二级菜单
+		// if(menu2==1)	{Menu2_Motor();}
+		// if(menu2==2)	{Menu2_PID();}
+		// if(menu2==3)	{}
+		// if(menu2==4)	{Menu2_MPU6050();}
+		// if(menu2==5)	{}
+		// if(menu2==6)	{Menu2_Clock();}
+		// if(menu2==7)	{}
+		// if(menu2==8)	{}
 
 		// Speed_Left = TIM2_Encoder_Get();
 		// Speed_Right = TIM4_Encoder_Get();

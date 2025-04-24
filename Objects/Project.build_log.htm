@@ -22,25 +22,15 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\a_Drug\MedicalCar - ож\Project.uvprojx
-Project File Date:  04/23/2025
+Project File Date:  04/24/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\keil5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-compiling TIM2_PID.c...
-Hardware\TIM2_PID.c(133): warning:  #223-D: function "TIM2_Encoder_Get" declared implicitly
-  			Speed = TIM2_Encoder_Get();
-Hardware\TIM2_PID.c(136): error:  #20: identifier "Inner" is undefined
-  			Inner.Actual = Speed;
-Hardware\TIM2_PID.c(140): warning:  #223-D: function "Motor_SetPWM" declared implicitly
-  			Motor_SetPWM(Inner.Out);
-Hardware\TIM2_PID.c(148): error:  #20: identifier "Outer" is undefined
-  			Outer.Actual = Location;
-Hardware\TIM2_PID.c(152): error:  #20: identifier "Inner" is undefined
-  			Inner.Target = Outer.Out;
-Hardware\TIM2_PID.c: 2 warnings, 3 errors
-compiling menu.c...
-".\Objects\Project.axf" - 3 Error(s), 2 Warning(s).
+compiling main.c...
+linking...
+Program Size: Code=5468 RO-data=268 RW-data=164 ZI-data=2052  
+".\Objects\Project.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -53,7 +43,6 @@ Package Vendor: Keil
   D:/keil5/ARM/PACK/Keil/STM32F1xx_DFP/2.2.0/Device/Include
 
 <h2>Collection of Component Files used:</h2>
-Target not created.
 Build Time Elapsed:  00:00:01
 </pre>
 </body>

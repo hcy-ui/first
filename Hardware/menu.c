@@ -4,7 +4,7 @@
 #include "Key.h"        // Device header
 #include "TIM1_Motor.h" // Device header
 #include "stdlib.h"     // Device header
-#include "TIM2_PID.h"        // Device header
+#include "TIM3_PID.h"        // Device header
 
 uint8_t KeyNum;
 uint8_t Menu1_Direction = 2;

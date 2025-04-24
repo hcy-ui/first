@@ -1,6 +1,8 @@
-#ifndef __Track_H
-#define __Track_H
+#ifndef __TIM2_4_ENCODER_H
+#define __TIM2_4_ENCODER_H
 
-uint16_t Sensor_GetState(void);
-void gray_check(void);
+void Track_Init(void);
+float Track_Num(void);
+
+
 #endif

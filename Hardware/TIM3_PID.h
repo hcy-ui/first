@@ -1,5 +1,5 @@
-#ifndef __PID_H
-#define __PID_H
+#ifndef __TIM3_PID_H
+#define __TIM3_PID_H
 
 typedef struct 
 {
@@ -31,6 +31,6 @@ typedef struct
 } PID_t;
 
 void PID_Update(PID_t *p);
-void Tim2_Init(void);
+void TIM3_Init(void);
 
 #endif

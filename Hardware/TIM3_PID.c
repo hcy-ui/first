@@ -1,10 +1,9 @@
 #include "stm32f10x.h" // Device header
-#include "TIM2_PID.h"  // Device header
+#include "TIM3_PID.h"  // Device header
 #include "math.h"
 #include "menu.h"
-#include "Encoder.h"
+#include "TIM2_4_ENCODER.h"
 
-uint8_t KeyNum;
 
 int16_t Speed_Left, Speed_Right, Location_Left, Location_Right;
 
@@ -74,13 +73,13 @@ void PID_Update(PID_t *p)
  * 参    数：无
  * 返 回 值：无
  */
-void Tim2_Init(void)
+void TIM3_Init(void)
 {
 	/*开启时钟*/
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); // 开启TIM2的时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); // 开启TIM3的时钟
 
 	/*配置时钟源*/
-	TIM_InternalClockConfig(TIM2); // 选择TIM2为内部时钟，若不调用此函数，TIM默认也为内部时钟
+	TIM_InternalClockConfig(TIM3); // 选择TIM3为内部时钟，若不调用此函数，TIM默认也为内部时钟
 
 	/*时基单元初始化*/
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;				// 定义结构体变量
@@ -89,15 +88,15 @@ void Tim2_Init(void)
 	TIM_TimeBaseInitStructure.TIM_Period = 1000 - 1;				// 计数周期，即ARR的值
 	TIM_TimeBaseInitStructure.TIM_Prescaler = 72 - 1;				// 预分频器，即PSC的值
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;			// 重复计数器，高级定时器才会用到
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);				// 将结构体变量交给TIM_TimeBaseInit，配置TIM2的时基单元
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);				// 将结构体变量交给TIM_TimeBaseInit，配置TIM3的时基单元
 
 	/*中断输出配置*/
-	TIM_ClearFlag(TIM2, TIM_FLAG_Update); // 清除定时器更新标志位
+	TIM_ClearFlag(TIM3, TIM_FLAG_Update); // 清除定时器更新标志位
 										  // TIM_TimeBaseInit函数末尾，手动产生了更新事件
 										  // 若不清除此标志位，则开启中断后，会立刻进入一次中断
 										  // 如果不介意此问题，则不清除此标志位也可
 
-	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE); // 开启TIM2的更新中断
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE); // 开启TIM3的更新中断
 
 	/*NVIC中断分组*/
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // 配置NVIC为分组2
@@ -108,20 +107,20 @@ void Tim2_Init(void)
 
 	/*NVIC配置*/
 	NVIC_InitTypeDef NVIC_InitStructure;					  // 定义结构体变量
-	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;			  // 选择配置NVIC的TIM2线
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;			  // 选择配置NVIC的TIM3线
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  // 指定NVIC线路使能
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; // 指定NVIC线路的抢占优先级为2
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		  // 指定NVIC线路的响应优先级为1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		  // 指定NVIC线路的响应优先级为1
 	NVIC_Init(&NVIC_InitStructure);							  // 将结构体变量交给NVIC_Init，配置NVIC外设
 
 	/*TIM使能*/
-	TIM_Cmd(TIM2, ENABLE); // 使能TIM2，定时器开始运行
+	TIM_Cmd(TIM3, ENABLE); // 使能TIM3，定时器开始运行
 }
 
-void TIM2_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
 	static uint16_t Count1, Count2;
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
 	{
 		Count1++;
 		if (Count1 >= 40)
@@ -137,7 +136,7 @@ void TIM2_IRQHandler(void)
 
 			PID_Update(&Inner);
 
-			Motor_SetPWM(Inner.Out);
+			// Motor_SetPWM(Inner.Out);
 		}
 
 		Count2++;
@@ -151,6 +150,6 @@ void TIM2_IRQHandler(void)
 
 			Inner.Target = Outer.Out;
 		}
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
 }

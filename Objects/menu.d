@@ -34,4 +34,4 @@
 .\objects\menu.o: Hardware\Key.h
 .\objects\menu.o: Hardware\TIM1_Motor.h
 .\objects\menu.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\menu.o: Hardware\TIM2_PID.h
+.\objects\menu.o: Hardware\TIM3_PID.h
