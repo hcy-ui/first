@@ -1,6 +1,9 @@
+#include "TIM2_PID.h"        // Device header
 #ifndef __MENU_H
 #define __MENU_H
 
+extern PID_t Inner;
+extern PID_t Outer;
 
 int Menu1(void);
 int Menu2_Motor(void);

@@ -27,19 +27,19 @@ Project File Date:  04/23/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\keil5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-compiling menu.c...
-Hardware\menu.c(60): error:  #20: identifier "Speed" is undefined
-  			Speed = Encoder_Get();
-Hardware\menu.c(60): warning:  #223-D: function "Encoder_Get" declared implicitly
-  			Speed = Encoder_Get();
-Hardware\menu.c(61): error:  #20: identifier "Location" is undefined
-  			Location += Speed;
-Hardware\menu.c(67): warning:  #223-D: function "Motor_SetPWM" declared implicitly
-  			Motor_SetPWM(Inner.Out);
-Hardware\menu.c(75): error:  #20: identifier "Location" is undefined
-  			Outer.Actual = Location;
-Hardware\menu.c: 2 warnings, 3 errors
 compiling TIM2_PID.c...
+Hardware\TIM2_PID.c(133): warning:  #223-D: function "TIM2_Encoder_Get" declared implicitly
+  			Speed = TIM2_Encoder_Get();
+Hardware\TIM2_PID.c(136): error:  #20: identifier "Inner" is undefined
+  			Inner.Actual = Speed;
+Hardware\TIM2_PID.c(140): warning:  #223-D: function "Motor_SetPWM" declared implicitly
+  			Motor_SetPWM(Inner.Out);
+Hardware\TIM2_PID.c(148): error:  #20: identifier "Outer" is undefined
+  			Outer.Actual = Location;
+Hardware\TIM2_PID.c(152): error:  #20: identifier "Inner" is undefined
+  			Inner.Target = Outer.Out;
+Hardware\TIM2_PID.c: 2 warnings, 3 errors
+compiling menu.c...
 ".\Objects\Project.axf" - 3 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
