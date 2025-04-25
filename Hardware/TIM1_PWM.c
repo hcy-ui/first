@@ -5,7 +5,7 @@
   * 参    数：无666
   * 返 回 值：无
   */
-void PWM_Init(void)
+void TIM1_PWM_Init(void)
 {
 	/*开启时钟*/
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);			//开启TIM1的时钟

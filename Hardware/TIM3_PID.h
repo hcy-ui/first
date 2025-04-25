@@ -31,6 +31,7 @@ typedef struct
 } PID_t;
 
 void PID_Update(PID_t *p);
-void TIM3_Init(void);
+void PID_Sim_Update(PID_t *p);
+void TIM3_PID_Init(void);
 
 #endif

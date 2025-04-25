@@ -1,8 +1,8 @@
-#ifndef __TIM2_4_ENCODER_H
-#define __TIM2_4_ENCODER_H
+#ifndef __Track_H
+#define __Track_H
 
 void Track_Init(void);
-float Track_Num(void);
+int16_t Track_Calculate_Error(void);
 
 
 #endif

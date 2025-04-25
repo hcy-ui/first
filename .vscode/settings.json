@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "tim2_4_encoder.h": "c",
+        "tim1_pwm.h": "c",
+        "tim3_pid.h": "c"
+    }
+}

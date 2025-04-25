@@ -251,7 +251,7 @@ int Menu3_Motor_SetSpeed(void)
             {
                 Mo_Speed = -100;
             }
-            Motor_SetSpeed(Mo_Speed, -Mo_Speed);
+            TIM1_Motor_SetSpeed(Mo_Speed, -Mo_Speed);
         }
         if (KeyNum == 2)
         {
@@ -260,7 +260,7 @@ int Menu3_Motor_SetSpeed(void)
             {
                 Mo_Speed = 100;
             }
-            Motor_SetSpeed(Mo_Speed, -Mo_Speed);
+            TIM1_Motor_SetSpeed(Mo_Speed, -Mo_Speed);
         }
         if (KeyNum == 3)
         {

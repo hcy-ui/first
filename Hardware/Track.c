@@ -2,49 +2,62 @@
 
 uint16_t Coe;
 
+/// @brief 八路循迹
+/// @param  无
 void Track_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6| GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);						//将PA1和PA2引脚初始化为推挽输出
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);						//将PA1和PA2引脚初始化为推挽输出
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);						//将PA1和PA2引脚初始化为推挽输出
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-float Track_Num(void)
+/// @brief 
+/// @param  
+/// @return 
+float Track_Calculate_Error(void)
 {
-    if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_4)==1)&&   (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)==1)&&
-    (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_0)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_1)==1))
-    {   }
+    int weight[8] = {-3, -2, -1, -0.5, 0.5, 1, 2, 3};
+    uint8_t sensor[8];
 
-    
-    if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_4)==1)&&   (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)==1)&&
-    (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_0)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_1)==1))
-    {   }
+    sensor[0] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4);
+    sensor[1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5);
+    sensor[2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_6);
+    sensor[3] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7);
+    sensor[4] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0);
+    sensor[5] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1);
+    sensor[6] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_4);
+    sensor[7] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
 
-    
-    if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_4)==1)&&   (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)==1)&&
-    (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_0)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_1)==1))
-    {   }
+    float error = 0;
+    int count = 0;
 
-    
-    if((GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_4)==1)&&   (GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)==1)&&
-    (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6)==1)&&(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_0)==1)&&(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_1)==1))
-    {   }
+    for (int i = 0; i < 8; i++)
+    {
+        if (sensor[i] == 0) // 黑线为低电平
+        {
+            error += weight[i];
+            count++;
+        }
+    }
 
+    if (count == 0)
+        return 0; // 全白或全黑处理
 
+    return error / count;
 }

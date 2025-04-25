@@ -4,9 +4,8 @@
 #include "menu.h"
 #include "TIM2_4_ENCODER.h"
 
-
-int16_t Speed_Left, Speed_Right, Location_Left, Location_Right;
-
+/// @brief 超级pid模板
+/// @param 无
 void PID_Update(PID_t *p)
 {
 
@@ -20,7 +19,7 @@ void PID_Update(PID_t *p)
 	{
 		if (p->Ki != 0) // Ki不等于0，才开始积分
 		{
-			if (fabs(p->Error0 < 50)) // 积分分离（开始时误差大，不需要积分项）（50为参考值）
+			if (fabs(p->Error0) < 50) // 积分分离（开始时误差大，不需要积分项）（50为参考值）
 			{
 				p->ErrorInt += p->Error0;
 				if (p->ErrorInt > p->ErrorIntMax) // 积分限幅（参考值20000）
@@ -31,6 +30,10 @@ void PID_Update(PID_t *p)
 				{
 					p->ErrorInt = p->ErrorIntMin;
 				}
+			}
+			else
+			{
+				p->ErrorInt = 0;
 			}
 		}
 		else
@@ -68,12 +71,58 @@ void PID_Update(PID_t *p)
 	}
 }
 
+/// @brief 简化pid模板
+/// @param 无
+void PID_Sim_Update(PID_t *p)
+{
+
+	p->Error1 = p->Error0;
+	p->Error0 = p->Target - p->Actual;
+	if (p->Ki != 0) // Ki不等于0，才开始积分
+	{
+		if (fabs(p->Error0) < 50) // 积分分离（开始时误差大，不需要积分项）（50为参考值）
+		{
+			p->ErrorInt += p->Error0;
+			if (p->ErrorInt > p->ErrorIntMax) // 积分限幅（参考值20000）
+			{
+				p->ErrorInt = p->ErrorIntMax;
+			}
+			if (p->ErrorInt < p->ErrorIntMin)
+			{
+				p->ErrorInt = p->ErrorIntMin;
+			}
+		}
+		else
+		{
+			p->ErrorInt = 0;
+		}
+	}
+	else
+	{
+		p->ErrorInt = 0;
+	}
+
+	float a = 0.9;														   // （a越大，滤波效果越强，但响应越慢）
+	p->DifOut = (1 - a) * p->Kd * (p->Error0 - p->Error1) + a * p->DifOut; // 低通滤波（微分先行）（对积分项进行滤波）
+
+	p->Out = p->Kp * p->Error0 + p->Ki * p->ErrorInt + p->DifOut; // 位置式积分
+
+	if (p->Out > p->OutMax) // 输出限幅（一般电机为100）
+	{
+		p->Out = p->OutMax;
+	}
+	else if (p->Out < p->OutMin)
+	{
+		p->Out = p->OutMin;
+	}
+}
+
 /**
  * 函    数：定时中断初始化
  * 参    数：无
  * 返 回 值：无
  */
-void TIM3_Init(void)
+void TIM3_PID_Init(void)
 {
 	/*开启时钟*/
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); // 开启TIM3的时钟
@@ -115,41 +164,4 @@ void TIM3_Init(void)
 
 	/*TIM使能*/
 	TIM_Cmd(TIM3, ENABLE); // 使能TIM3，定时器开始运行
-}
-
-void TIM3_IRQHandler(void)
-{
-	static uint16_t Count1, Count2;
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
-	{
-		Count1++;
-		if (Count1 >= 40)
-		{
-			Count1 = 0;
-
-			Speed_Left = TIM2_Encoder_Get();
-			Speed_Right = TIM4_Encoder_Get();
-			Location_Left += Speed_Left;
-			Location_Right += Speed_Right;
-
-			Inner.Actual = (Speed_Left + Speed_Right) / 2;
-
-			PID_Update(&Inner);
-
-			// Motor_SetPWM(Inner.Out);
-		}
-
-		Count2++;
-		if (Count2 >= 40)
-		{
-			Count2 = 0;
-
-			Outer.Actual = (Location_Left + Speed_Right) / 2;
-
-			PID_Update(&Outer);
-
-			Inner.Target = Outer.Out;
-		}
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	}
 }

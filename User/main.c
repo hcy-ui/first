@@ -1,25 +1,100 @@
 #include "stm32f10x.h" // Device header
-#include "Delay.h"
-#include "DDelay.h"
 #include "OLED.h"
 #include "TIM1_Motor.h"
 #include "TIM2_4_Encoder.h"
-#include "RP.h"
-//#include "Timer3_Blooteeth.h"
-#include "Key.h"
-#include "menu.h"
+#include "TIM3_pid.h"
+#include "Track.h"
+// #include "Delay.h"
+// #include "DDelay.h"
+// #include "RP.h"
+// #include "Timer3_Blooteeth.h"
+// #include "Key.h"
+// #include "menu.h"
 // #include "MYRTC.h"
 // #include "MPU6050.h"
 // #include "MPU_EXTI.h"
 // #include "inv_mpu.h"
-#include "TIM1_PWM.h"
-#include "Infrared.h"
+// #include "Infrared.h"
 
-// int16_t Speed_Left, Speed_Right, Location;aaa
-int8_t menu2;
+int16_t Speed_Left, Speed_Right, Location_Left, Location_Right;
+int16_t out_left,out_right;
+float error;
+// int8_t menu2;
+
+PID_t IInner = {
+	.Kp = 0,
+	.Ki = 0,
+	.Kd = 0,
+
+	.Speed_Left = 0,
+	.Speed_Right = 0,
+
+	.Target = 30,
+	.Actual = 0,
+	.Out = 0,
+
+	.OutMax = 100,
+	.OutMin = -100,
+
+	.Error0 = 0,
+	.Error1 = 0,
+	.ErrorInt = 0,
+	.ErrorIntMax = 20000,
+	.ErrorIntMin = -20000,
+};
+
+PID_t OOuter = {
+	.Kp = 0,
+	.Ki = 0,
+	.Kd = 0,
+
+	.Speed_Left = 0,
+	.Speed_Right = 0,
+
+	.Target = 0,
+	.Actual = 0,
+	.Out = 0,
+
+	.OutMax = 100,
+	.OutMin = -100,
+
+	.Error0 = 0,
+	.Error1 = 0,
+	.ErrorInt = 0,
+	.ErrorIntMax = 20000,
+	.ErrorIntMin = -20000,
+};
+
+PID_t Track_PID = {
+	.Kp = 0,
+	.Ki = 0,
+	.Kd = 0,
+
+	.Speed_Left = 0,
+	.Speed_Right = 0,
+
+	.Target = 0,
+	.Actual = 0,
+	.Out = 0,
+
+	.OutMax = 100,
+	.OutMin = -100,
+
+	.Error0 = 0,
+	.Error1 = 0,
+	.ErrorInt = 0,
+	.ErrorIntMax = 20000,
+	.ErrorIntMin = -20000,
+};
+
 int main(void)
 {
 	OLED_Init();
+	TIM1_Motor_Init();
+	TIM2_Encoder_Init();
+	TIM4_Encoder_Init();
+	TIM3_PID_Init();
+	Track_Init();
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);			//开启GPIOA的时钟
 	// Key_Init();
 	// Infrared_Init();
@@ -27,9 +102,6 @@ int main(void)
 	// delay_init();
 	// MPU6050_DMP_Init();
 	// MPU_EXTI_Init();
-	Motor_Init();
-	TIM2_Encoder_Init();
-	TIM4_Encoder_Init();			
 	// Serial_Init();
 	// RP_Init();
 
@@ -55,7 +127,6 @@ int main(void)
 	while (1)
 	{
 
-
 		// menu2=Menu1();//二级菜单
 		// if(menu2==1)	{Menu2_Motor();}
 		// if(menu2==2)	{Menu2_PID();}
@@ -74,3 +145,55 @@ int main(void)
 		// Serial_Printf("%d,%d\r\n", Speed_Left, Speed_Right);
 	}
 }
+
+void TIM3_IRQHandler(void)
+{
+	static uint16_t Count1, Count2;
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
+	{
+		Count1++;
+		if (Count1 >= 10)
+		{
+			Count1 = 0;
+
+			Speed_Left = TIM2_Encoder_Get();
+			Speed_Right = TIM4_Encoder_Get();
+			Location_Left += Speed_Left;
+			Location_Right += Speed_Right;//获取速度and位置
+
+			error=Track_Calculate_Error();
+			Track_PID.Actual=error;
+			PID_Sim_Update(&Track_PID);//获取并计算误差
+
+			IInner.Speed_Left=IInner.Target+Track_PID.Out;
+			IInner.Speed_Right=IInner.Target-Track_PID.Out;//速度校准
+
+			IInner.Actual = Speed_Left;//速度环（左）
+			IInner.Target = IInner.Speed_Left;
+			PID_Sim_Update(&IInner);
+			out_left = IInner.Out;
+
+			IInner.Actual = Speed_Right;//速度环（右）
+			IInner.Target = IInner.Speed_Right;
+			PID_Sim_Update(&IInner);
+			out_right = IInner.Out;
+
+			TIM1_Motor_SetSpeed(out_left, -out_right);
+
+		}
+
+		Count2++;
+		if (Count2 >= 40)
+		{
+			Count2 = 0;
+
+			OOuter.Actual = (Location_Left + Location_Right) / 2;
+
+			PID_Sim_Update(&OOuter);
+
+			IInner.Target = OOuter.Out;
+		}
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	}
+}
+
