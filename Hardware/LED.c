@@ -28,7 +28,7 @@ void LED_Init(void)
   */
 void LED1_ON(void)
 {
-	GPIO_ResetBits(GPIOC, GPIO_Pin_8);		//设置PA1引脚为低电平
+	GPIO_SetBits(GPIOC, GPIO_Pin_8);		//设置PA1引脚为低电平
 }
 
 /**
@@ -38,7 +38,7 @@ void LED1_ON(void)
   */
 void LED1_OFF(void)
 {
-	GPIO_SetBits(GPIOC, GPIO_Pin_8);		//设置PA1引脚为高电平
+	GPIO_ResetBits(GPIOC, GPIO_Pin_8);		//设置PA1引脚为高电平
 }
 
 /**
@@ -65,7 +65,7 @@ void LED1_Turn(void)
   */
 void LED2_ON(void)
 {
-	GPIO_ResetBits(GPIOC, GPIO_Pin_9);		//设置PA2引脚为低电平
+	GPIO_SetBits(GPIOC, GPIO_Pin_9);		//设置PA2引脚为低电平
 }
 
 /**
@@ -75,7 +75,7 @@ void LED2_ON(void)
   */
 void LED2_OFF(void)
 {
-	GPIO_SetBits(GPIOC, GPIO_Pin_9);		//设置PA2引脚为高电平
+	GPIO_ResetBits(GPIOC, GPIO_Pin_9);		//设置PA2引脚为高电平
 }
 
 /**

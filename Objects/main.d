@@ -34,3 +34,7 @@
 .\objects\main.o: .\Hardware\TIM2_4_Encoder.h
 .\objects\main.o: .\Hardware\TIM3_pid.h
 .\objects\main.o: .\Hardware\Track.h
+.\objects\main.o: .\Hardware\LED.h
+.\objects\main.o: .\Hardware\Buzzer.h
+.\objects\main.o: .\Hardware\USART3_WabCam.h
+.\objects\main.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdio.h
