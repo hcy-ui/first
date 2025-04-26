@@ -38,3 +38,4 @@
 .\objects\main.o: .\Hardware\Buzzer.h
 .\objects\main.o: .\Hardware\USART3_WabCam.h
 .\objects\main.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\main.o: D:\keil5\ARM\ARMCC\Bin\..\include\math.h

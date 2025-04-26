@@ -33,5 +33,6 @@ typedef struct
 void PID_Update(PID_t *p);
 void PID_Sim_Update(PID_t *p);
 void TIM3_PID_Init(void);
+float TIM3_PID_Limit(float x, float min, float max);
 
 #endif

@@ -165,3 +165,11 @@ void TIM3_PID_Init(void)
 	/*TIM使能*/
 	TIM_Cmd(TIM3, ENABLE); // 使能TIM3，定时器开始运行
 }
+
+float TIM3_PID_Limit(float x, float min, float max)
+{
+	if (x < min) return min;
+	if (x > max) return max;
+	return x;
+}
+
