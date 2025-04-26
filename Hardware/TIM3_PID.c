@@ -4,6 +4,8 @@
 #include "menu.h"
 #include "TIM2_4_ENCODER.h"
 
+extern PID_t IInner;
+
 /// @brief 超级pid模板
 /// @param 无
 void PID_Update(PID_t *p)
@@ -168,8 +170,33 @@ void TIM3_PID_Init(void)
 
 float TIM3_PID_Limit(float x, float min, float max)
 {
-	if (x < min) return min;
-	if (x > max) return max;
+	if (x < min)
+		return min;
+	if (x > max)
+		return max;
 	return x;
 }
 
+void Update_Speed_By_Position(float outer_out, float error_pos)
+{
+	float speed_cmd;
+
+	if (abs(error_pos) < 10)
+	{
+		speed_cmd = 0;
+	}
+	else if (abs(error_pos) < 50)
+	{
+		speed_cmd = TIM3_PID_Limit(outer_out, -15, 15);
+	}
+	else if (abs(error_pos) < 100)
+	{
+		speed_cmd = TIM3_PID_Limit(outer_out, -30, 30);
+	}
+	else
+	{
+		speed_cmd = TIM3_PID_Limit(outer_out, -50, 50);
+	}
+
+	IInner.Target = speed_cmd;
+}

@@ -23,8 +23,8 @@
 
 int16_t Speed_Left, Speed_Right, Location_Left, Location_Right;
 int16_t out_left, out_right;
-int16_t error_pos;
-float error,track_out;
+float error_pos;
+float error, track_out;
 // int8_t menu2;
 
 PID_t IInner = {
@@ -192,9 +192,9 @@ void TIM3_IRQHandler(void)
 			Track_PID.Actual = error;
 			PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-			track_out = Limit(Track_PID.Out, -20, 20);
+			track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
 			IInner.Speed_Left = IInner.Target + track_out;
-			IInner.Speed_Right = IInner.Target - track_out;// 速度校准
+			IInner.Speed_Right = IInner.Target - track_out; // 速度校准
 
 			IInner.Actual = Speed_Left; // 速度环（左）
 			IInner.Target = IInner.Speed_Left;
@@ -218,16 +218,9 @@ void TIM3_IRQHandler(void)
 
 			PID_Sim_Update(&OOuter);
 
-			int16_t error_pos = OOuter.Target - OOuter.Actual;
+			error_pos = OOuter.Target - OOuter.Actual;
 
-			if (abs(error_pos) < 10) // 位置误差小于阈值
-			{
-				IInner.Target = 0; // 速度目标设为0，停车
-			}
-			else
-			{
-				IInner.Target = Limit(OOuter.Out, -50, 50);
-			}
+			Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
 		}
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
