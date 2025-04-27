@@ -5,6 +5,12 @@
 #include "TIM2_4_ENCODER.h"
 
 extern PID_t IInner;
+extern PID_t OOuter;
+#define PI 3.14159265358979323846		 // 圆周率
+#define encoder_pulses_per_revolution 13.0 // 电机编码器线数
+#define gear_reduction_ratio 20.0			 // 减速比
+#define wheel_diameter_mm 48.0			 // 轮子直径(mm)
+#define pulse 4.0							 // 编码器脉冲倍频（一般不需要改）
 
 /// @brief 超级pid模板
 /// @param 无
@@ -200,3 +206,11 @@ void Update_Speed_By_Position(float outer_out, float error_pos)
 
 	IInner.Target = speed_cmd;
 }
+
+/// @brief 直接输入位置即可（单位：mm）
+/// @param Actual_Location 
+void TIM3_PID_Locate(float Actual_Location)
+{
+	OOuter.Target = Actual_Location*encoder_pulses_per_revolution*gear_reduction_ratio*pulse/PI/wheel_diameter_mm;
+}
+

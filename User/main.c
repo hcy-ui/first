@@ -9,6 +9,7 @@
 #include "USART3_WabCam.h"
 #include "math.h"
 
+
 // #include "Delay.h"
 // #include "DDelay.h"
 // #include "RP.h"
@@ -179,7 +180,7 @@ void TIM3_IRQHandler(void)
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
 	{
 		Count1++;
-		if (Count1 >= 10)
+		if (Count1 >= 10)//内环（速度+灰度）
 		{
 			Count1 = 0;
 
@@ -210,7 +211,7 @@ void TIM3_IRQHandler(void)
 		}
 
 		Count2++;
-		if (Count2 >= 100)
+		if (Count2 >= 100)//外环（位置）
 		{
 			Count2 = 0;
 
