@@ -9,7 +9,6 @@
 #include "USART3_WabCam.h"
 #include "math.h"
 
-
 // #include "Delay.h"
 // #include "DDelay.h"
 // #include "RP.h"
@@ -26,10 +25,11 @@ int16_t Speed_Left, Speed_Right, Location_Left, Location_Right;
 int16_t out_left, out_right;
 float error_pos;
 float error, track_out;
+uint16_t Count3;
 // int8_t menu2;
 
 PID_t IInner = {
-	.Kp = 0,
+	.Kp = 0.3,
 	.Ki = 0,
 	.Kd = 0,
 
@@ -120,7 +120,11 @@ int main(void)
 	OLED_Update();
 
 	TIM1_Motor_Init();
-	TIM1_Motor_SetSpeed(30,30);
+	// TIM1_Motor_SetSpeed(30,30);
+
+	TIM2_Encoder_Init();
+	TIM4_Encoder_Init();
+	TIM3_PID_Init();
 
 	// USART3_Serial_Init();
 
@@ -155,6 +159,8 @@ int main(void)
 
 	while (1)
 	{
+		OLED_Printf(0, 38, OLED_8X16, "%d", Count3);
+		OLED_Update();
 		// OLED_Printf(0, 38, OLED_8X16, "%4d", USART3_Serial_RxData);
 		// OLED_Update();
 
@@ -177,55 +183,57 @@ int main(void)
 	}
 }
 
-// void TIM3_IRQHandler(void)
-// {
-// 	static uint16_t Count1, Count2;
-// 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
-// 	{
-// 		Count1++;
-// 		if (Count1 >= 10)//内环（速度+灰度）
-// 		{
-// 			Count1 = 0;
+void TIM3_IRQHandler(void)
+{
+	static uint16_t Count1, Count2;
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
+	{
 
-// 			Speed_Left = TIM2_Encoder_Get();
-// 			Speed_Right = TIM4_Encoder_Get();
-// 			Location_Left += Speed_Left;
-// 			Location_Right += Speed_Right; // 获取速度and位置
+		Count3++;
 
-// 			error = Track_Calculate_Error();
-// 			Track_PID.Actual = error;
-// 			PID_Sim_Update(&Track_PID); // 获取并计算误差
+		if (Count1 >= 10)//内环（速度+灰度）
+		{
+			Count1 = 0;
 
-// 			track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
-// 			IInner.Speed_Left = IInner.Target + track_out;
-// 			IInner.Speed_Right = IInner.Target - track_out; // 速度校准
+			Speed_Left = TIM2_Encoder_Get();
+			Speed_Right = TIM4_Encoder_Get();
+			Location_Left += Speed_Left;
+			Location_Right += Speed_Right; // 获取速度and位置
 
-// 			IInner.Actual = Speed_Left; // 速度环（左）
-// 			IInner.Target = IInner.Speed_Left;
-// 			PID_Sim_Update(&IInner);
-// 			out_left = IInner.Out;
+			// error = Track_Calculate_Error();
+			// Track_PID.Actual = error;
+			// PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-// 			IInner.Actual = Speed_Right; // 速度环（右）
-// 			IInner.Target = IInner.Speed_Right;
-// 			PID_Sim_Update(&IInner);
-// 			out_right = IInner.Out;
+			track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
+			IInner.Speed_Left = IInner.Target + track_out;
+			IInner.Speed_Right = IInner.Target - track_out; // 速度校准
 
-// 			TIM1_Motor_SetSpeed(out_left, -out_right);
-// 		}
+			IInner.Actual = Speed_Left; // 速度环（左）
+			IInner.Target = IInner.Speed_Left;
+			PID_Sim_Update(&IInner);
+			out_left = IInner.Out;
 
-// 		Count2++;
-// 		if (Count2 >= 100)//外环（位置）
-// 		{
-// 			Count2 = 0;
+			IInner.Actual = Speed_Right; // 速度环（右）
+			IInner.Target = IInner.Speed_Right;
+			PID_Sim_Update(&IInner);
+			out_right = IInner.Out;
 
-// 			OOuter.Actual = (Location_Left + Location_Right) / 2;
+			TIM1_Motor_SetSpeed(out_left, out_right);
+		}
 
-// 			PID_Sim_Update(&OOuter);
+		// Count2++;
+		// if (Count2 >= 100)//外环（位置）
+		// {
+		// 	Count2 = 0;
 
-// 			error_pos = OOuter.Target - OOuter.Actual;
+		// 	OOuter.Actual = (Location_Left + Location_Right) / 2;
 
-// 			Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
-// 		}
-// 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-// 	}
-// }
+		// 	PID_Sim_Update(&OOuter);
+
+		// 	error_pos = OOuter.Target - OOuter.Actual;
+
+		// 	Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
+		// }
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	}
+}
