@@ -238,9 +238,9 @@ void TIM3_IRQHandler(void)
 			// Track_PID.Actual = error;
 			// PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-			track_out = TIM3_PID_Limit(Track_PID.Out, -40, 40); // 限幅，防止方向大转
-			Inner_Left.Speed = Inner_Left.Target + track_out;
-			Inner_Right.Speed = Inner_Right.Target - track_out; // 速度校准
+			// track_out = TIM3_PID_Limit(Track_PID.Out, -40, 40); // 限幅，防止方向大转
+			// Inner_Left.Speed = Inner_Left.Target + track_out;
+			// Inner_Right.Speed = Inner_Right.Target - track_out; // 速度校准
 		}
 
 		Count1++;
@@ -271,18 +271,20 @@ void TIM3_IRQHandler(void)
 			// Inner_Left.Target = Inner_Left.Speed;
 			PID_Sim_Update(&Inner_Left);
 			out_left = Inner_Left.Out;
-		}
 
-		Count3++;
-		if (Count3 >= 10)
-		{
-			Count3 = 0;
 			Inner_Right.Actual = Speed_Right; // 速度环（右）
 			// Inner_Right.Target = Inner_Right.Speed;
 			PID_Sim_Update(&Inner_Right);
 			out_right = Inner_Right.Out;
 
 			TIM1_Motor_SetSpeed(out_left, out_right);
+		}
+
+		Count3++;
+		if (Count3 >= 10)
+		{
+			Count3 = 0;
+
 		}
 		// Count4++;0
 		// if (Count4 >= 100)//外环（位置）
