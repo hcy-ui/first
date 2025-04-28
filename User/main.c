@@ -171,7 +171,6 @@ int main(void)
 		OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
 		OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", IInner.Out);
 		OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", IInner.Actual);
-		
 
 		OLED_Update();
 
@@ -219,30 +218,31 @@ void TIM3_IRQHandler(void)
 			Location_Left += Speed_Left;
 			Location_Right += Speed_Right; // 获取速度and位置
 
-			IInner.Actual = (float)(-Speed_Left + Speed_Right) / 2.0;
-
-			PID_Sim_Update(&IInner);
-			TIM1_Motor_SetSpeed(IInner.Out, IInner.Out);
+			/***********测试速度用法
+			// IInner.Actual = (float)(-Speed_Left + Speed_Right) / 2.0;
+			// PID_Sim_Update(&IInner);
+			// TIM1_Motor_SetSpeed(IInner.Out, IInner.Out);
+			***************/
 
 			// error = Track_Calculate_Error();
 			// Track_PID.Actual = error;
 			// PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-			// track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
-			// IInner.Speed_Left = IInner.Target + track_out;
-			// IInner.Speed_Right = IInner.Target - track_out; // 速度校准
+			track_out = TIM3_PID_Limit(Track_PID.Out, -40, 40); // 限幅，防止方向大转
+			IInner.Speed_Left = IInner.Target + track_out;
+			IInner.Speed_Right = IInner.Target - track_out; // 速度校准
 
-			// IInner.Actual = Speed_Left; // 速度环（左）
-			// IInner.Target = IInner.Speed_Left;
-			// PID_Sim_Update(&IInner);
-			// out_left = IInner.Out;
+			IInner.Actual = Speed_Left; // 速度环（左）
+			IInner.Target = IInner.Speed_Left;
+			PID_Sim_Update(&IInner);
+			out_left = IInner.Out;
 
-			// IInner.Actual = Speed_Right; // 速度环（右）
-			// IInner.Target = IInner.Speed_Right;
-			// PID_Sim_Update(&IInner);
-			// out_right = IInner.Out;
+			IInner.Actual = Speed_Right; // 速度环（右）
+			IInner.Target = IInner.Speed_Right;
+			PID_Sim_Update(&IInner);
+			out_right = IInner.Out;
 
-			// TIM1_Motor_SetSpeed(out_left, out_right);
+			TIM1_Motor_SetSpeed(out_left, out_right);
 		}
 
 		// Count2++;
