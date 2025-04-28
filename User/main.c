@@ -8,6 +8,7 @@
 #include "Track.h"
 #include "USART3_WabCam.h"
 #include "math.h"
+#include "RP.h"
 
 // #include "Delay.h"
 // #include "DDelay.h"
@@ -29,14 +30,14 @@ uint16_t Count3;
 // int8_t menu2;
 
 PID_t IInner = {
-	.Kp = 0.3,
+	.Kp = 0,
 	.Ki = 0,
 	.Kd = 0,
 
 	.Speed_Left = 0,
 	.Speed_Right = 0,
 
-	.Target = 30,
+	.Target = 0,
 	.Actual = 0,
 	.Out = 0,
 
@@ -46,8 +47,8 @@ PID_t IInner = {
 	.Error0 = 0,
 	.Error1 = 0,
 	.ErrorInt = 0,
-	.ErrorIntMax = 20000,
-	.ErrorIntMin = -20000,
+	.ErrorIntMax = 200,
+	.ErrorIntMin = -200,
 };
 
 PID_t OOuter = {
@@ -110,21 +111,23 @@ int main(void)
 	// Buzzer_OFF();
 
 	OLED_Init();
-	OLED_ShowChar(0, 0, 'A', OLED_8X16);
-	OLED_ShowString(16, 0, "Hello world!", OLED_8X16);
-	OLED_ShowChar(0, 18, 'A', OLED_6X8);
-	OLED_ShowString(16, 18, "Hello world!", OLED_6X8);
-	OLED_ShowNum(0, 28, 12345, 5, OLED_6X8);
-	OLED_ShowSignedNum(40, 28, -66, 2, OLED_6X8);
-	OLED_Printf(32, 0, OLED_8X16, "%4d", 123);
-	OLED_Update();
+	// OLED_ShowChar(0, 0, 'A', OLED_8X16);
+	// OLED_ShowString(16, 0, "Hello world!", OLED_8X16);
+	// OLED_ShowChar(0, 18, 'A', OLED_6X8);
+	// OLED_ShowString(16, 18, "Hello world!", OLED_6X8);
+	// OLED_ShowNum(0, 28, 12345, 5, OLED_6X8);
+	// OLED_ShowSignedNum(40, 28, -66, 2, OLED_6X8);
+	// OLED_Printf(32, 0, OLED_8X16, "%4d", 123);
+	// OLED_Update();
 
 	TIM1_Motor_Init();
-	// TIM1_Motor_SetSpeed(30,30);
+	// TIM1_Motor_SetSpeed(30, 30);
 
 	TIM2_Encoder_Init();
 	TIM4_Encoder_Init();
 	TIM3_PID_Init();
+
+	RP_Init();
 
 	// USART3_Serial_Init();
 
@@ -140,11 +143,11 @@ int main(void)
 
 	// OLED_ShowChar(0, 0, 'A', OLED_8X16);
 	// OLED_ShowString(16, 0, "Hello world!", OLED_8X16);
-	//	OLED_ShowChar(0,18,'A',OLED_6X8);
-	//	OLED_ShowString(16,18,"Hello world!",OLED_6X8);
-	//	OLED_ShowNum(0,28,12345,5,OLED_6X8);
-	//	OLED_ShowSignedNum(40,28,-66,2,OLED_6X8);
-	// OLED_Printf(32,0,OLED_8X16,"%4d",123);
+	// OLED_ShowChar(0, 18, 'A', OLED_6X8);
+	// OLED_ShowString(16, 18, "Hello world!", OLED_6X8);
+	// OLED_ShowNum(0, 28, 12345, 5, OLED_6X8);
+	// OLED_ShowSignedNum(40, 28, -66, 2, OLED_6X8);
+	// OLED_Printf(32, 0, OLED_8X16, "%4d", 123);
 	// OLED_Update();
 
 	// 电位器测试代码
@@ -159,8 +162,24 @@ int main(void)
 
 	while (1)
 	{
-		OLED_Printf(0, 38, OLED_8X16, "%d", Count3);
+		OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", IInner.Kp);
+		OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", IInner.Ki);
+		OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", IInner.Kd);
+		OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", IInner.Target);
+
+		OLED_Printf(64, 0, OLED_8X16, "SL:%04d", -Speed_Left);
+		OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
+		OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", IInner.Out);
+		OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", IInner.Actual);
+		
+
 		OLED_Update();
+
+		IInner.Kp = RP_GetValue(1) / 4095.0 * 2;
+		IInner.Ki = RP_GetValue(3) / 4095.0 * 1;
+		IInner.Kd = RP_GetValue(4) / 4095.0 * 2;
+		IInner.Target = RP_GetValue(2) / 4095.0 * 200 - 100;
+
 		// OLED_Printf(0, 38, OLED_8X16, "%4d", USART3_Serial_RxData);
 		// OLED_Update();
 
@@ -190,8 +209,8 @@ void TIM3_IRQHandler(void)
 	{
 
 		Count3++;
-
-		if (Count1 >= 10)//内环（速度+灰度）
+		Count1++;
+		if (Count1 >= 10) // 内环（速度+灰度）
 		{
 			Count1 = 0;
 
@@ -200,25 +219,30 @@ void TIM3_IRQHandler(void)
 			Location_Left += Speed_Left;
 			Location_Right += Speed_Right; // 获取速度and位置
 
+			IInner.Actual = (float)(-Speed_Left + Speed_Right) / 2.0;
+
+			PID_Sim_Update(&IInner);
+			TIM1_Motor_SetSpeed(IInner.Out, IInner.Out);
+
 			// error = Track_Calculate_Error();
 			// Track_PID.Actual = error;
 			// PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-			track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
-			IInner.Speed_Left = IInner.Target + track_out;
-			IInner.Speed_Right = IInner.Target - track_out; // 速度校准
+			// track_out = TIM3_PID_Limit(Track_PID.Out, -20, 20); // 限幅，防止方向大转
+			// IInner.Speed_Left = IInner.Target + track_out;
+			// IInner.Speed_Right = IInner.Target - track_out; // 速度校准
 
-			IInner.Actual = Speed_Left; // 速度环（左）
-			IInner.Target = IInner.Speed_Left;
-			PID_Sim_Update(&IInner);
-			out_left = IInner.Out;
+			// IInner.Actual = Speed_Left; // 速度环（左）
+			// IInner.Target = IInner.Speed_Left;
+			// PID_Sim_Update(&IInner);
+			// out_left = IInner.Out;
 
-			IInner.Actual = Speed_Right; // 速度环（右）
-			IInner.Target = IInner.Speed_Right;
-			PID_Sim_Update(&IInner);
-			out_right = IInner.Out;
+			// IInner.Actual = Speed_Right; // 速度环（右）
+			// IInner.Target = IInner.Speed_Right;
+			// PID_Sim_Update(&IInner);
+			// out_right = IInner.Out;
 
-			TIM1_Motor_SetSpeed(out_left, out_right);
+			// TIM1_Motor_SetSpeed(out_left, out_right);
 		}
 
 		// Count2++;

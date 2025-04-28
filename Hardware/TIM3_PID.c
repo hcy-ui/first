@@ -88,7 +88,7 @@ void PID_Sim_Update(PID_t *p)
 	p->Error0 = p->Target - p->Actual;
 	if (p->Ki != 0) // Ki不等于0，才开始积分
 	{
-		if (fabs(p->Error0) < 50) // 积分分离（开始时误差大，不需要积分项）（50为参考值）
+		if (fabs(p->Error0) < 1000) // 积分分离（开始时误差大，不需要积分项）（50为参考值）
 		{
 			p->ErrorInt += p->Error0;
 			if (p->ErrorInt > p->ErrorIntMax) // 积分限幅（参考值20000）
@@ -110,7 +110,7 @@ void PID_Sim_Update(PID_t *p)
 		p->ErrorInt = 0;
 	}
 
-	float a = 0.9;														   // （a越大，滤波效果越强，但响应越慢）
+	float a = 0.5;														   // （a越大，滤波效果越强，但响应越慢）
 	p->DifOut = (1 - a) * p->Kd * (p->Error0 - p->Error1) + a * p->DifOut; // 低通滤波（微分先行）（对积分项进行滤波）
 
 	p->Out = p->Kp * p->Error0 + p->Ki * p->ErrorInt + p->DifOut; // 位置式积分
