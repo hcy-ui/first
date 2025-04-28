@@ -4,7 +4,8 @@
 #include "menu.h"
 #include "TIM2_4_ENCODER.h"
 
-extern PID_t IInner;
+extern PID_t Inner_Left;
+extern PID_t Inner_Right;
 extern PID_t OOuter;
 #define PI 3.14159265358979323846		 // 圆周率
 #define encoder_pulses_per_revolution 13.0 // 电机编码器线数
@@ -204,7 +205,8 @@ void Update_Speed_By_Position(float outer_out, float error_pos)
 		speed_cmd = TIM3_PID_Limit(outer_out, -50, 50);
 	}
 
-	IInner.Target = speed_cmd;
+	Inner_Left.Target = speed_cmd;
+	Inner_Right.Target = speed_cmd;
 }
 
 /// @brief 直接输入位置即可（单位：mm）

@@ -21,12 +21,10 @@ typedef struct
     float DifOut;//滤波变量
 
 
-
-    int16_t Speed_Left;
-    int16_t Speed_Right;
-
     int32_t ErrorIntMax;//最大积分（参考20000）
     int32_t ErrorIntMin;//反向最大积分
+
+    int16_t Speed;
     
 } PID_t;
 
