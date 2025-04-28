@@ -197,7 +197,7 @@ int main(void)
 		OLED_Printf(64, 0, OLED_8X16, "SL:%04d", -Speed_Left);
 		OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
 		OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
-		OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (-Inner_Left.Actual + Inner_Right.Actual) / 2);
+		OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
 
 		OLED_Update();
 
@@ -267,10 +267,10 @@ void TIM3_IRQHandler(void)
 			// Inner_Left.Speed = Inner_Left.Target + track_out;
 			// Inner_Right.Speed = Inner_Right.Target - track_out; // 速度校准
 
-			// Inner_Left.Actual = Speed_Left; // 速度环（左）
+			Inner_Left.Actual = Speed_Left; // 速度环（左）
 			// Inner_Left.Target = Inner_Left.Speed;
-			// PID_Sim_Update(&Inner_Left);
-			// out_left = Inner_Left.Out;
+			PID_Sim_Update(&Inner_Left);
+			out_left = Inner_Left.Out;
 		}
 
 		Count3++;
@@ -278,7 +278,7 @@ void TIM3_IRQHandler(void)
 		{
 			Count3 = 0;
 			Inner_Right.Actual = Speed_Right; // 速度环（右）
-			Inner_Right.Target = Inner_Right.Speed;
+			// Inner_Right.Target = Inner_Right.Speed;
 			PID_Sim_Update(&Inner_Right);
 			out_right = Inner_Right.Out;
 
