@@ -32,7 +32,7 @@ float error, track_out;
 // 左右内环速度环
 PID_t Inner_Left = {
 	.Kp = 4,
-	.Ki = 0.3,
+	.Ki = 0.4,
 	.Kd = 0,
 
 	.Target = 0,
@@ -54,7 +54,7 @@ PID_t Inner_Left = {
 
 PID_t Inner_Right = {
 	.Kp = 4,
-	.Ki = 0.3,
+	.Ki = 0.4,
 	.Kd = 0,
 
 	.Target = 0,
@@ -139,7 +139,7 @@ int main(void)
 	// OLED_Update();
 
 	TIM1_Motor_Init();
-	TIM1_Motor_SetSpeed(100, 100);
+	// TIM1_Motor_SetSpeed(100, 100);
 
 	TIM2_Encoder_Init();
 	TIM4_Encoder_Init();
@@ -197,7 +197,7 @@ int main(void)
 	
 			OLED_Update_Flag = 0;  // 清除标志位
 		}
-		// Inner_Left.Kp = RP_GetValue(1) / 4095.0 * 5;
+		// Inner_Left.Kp = RP_GetValue(1) / 4095.0 * 5;//内环速度控制
 		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
 		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
 		Inner_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
@@ -206,6 +206,13 @@ int main(void)
 		// Inner_Right.Ki = Inner_Left.Ki;
 		// Inner_Right.Kd = Inner_Left.Kd;
 		Inner_Right.Target = Inner_Left.Target;
+
+
+		OOuter.Target = TIM3_PID_Locate(600);
+		// OOuter.Target = RP_GetValue(1) / 4095.0 * 5;//外环位置控制
+		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
+		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
+		// Inner_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
 
 
 
@@ -283,19 +290,19 @@ void TIM3_IRQHandler(void)
 			
 		// }
 		// }
-		// Count4++;0
-		// if (Count4 >= 100)//外环（位置）
-		// {
-		// 	Count3 = 0;
+		Count4++;
+		if (Count4 >= 100)//外环（位置）
+		{
+			Count4 = 0;
 
-		// 	OOuter.Actual = (Location_Left + Location_Right) / 2;
+			OOuter.Actual = (Location_Left + Location_Right) / 2;
 
-		// 	PID_Sim_Update(&OOuter);
+			PID_Sim_Update(&OOuter);
 
-		// 	error_pos = OOuter.Target - OOuter.Actual;
+			error_pos = OOuter.Target - OOuter.Actual;
+			Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
 
-			// Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
-		// }
+		}
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
 

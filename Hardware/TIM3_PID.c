@@ -211,8 +211,8 @@ void Update_Speed_By_Position(float outer_out, float error_pos)
 
 /// @brief 直接输入位置即可（单位：mm）
 /// @param Actual_Location 
-void TIM3_PID_Locate(float Actual_Location)
+float TIM3_PID_Locate(float Actual_Location)
 {
-	OOuter.Target = Actual_Location*encoder_pulses_per_revolution*gear_reduction_ratio*pulse/PI/wheel_diameter_mm;
+	return Actual_Location*encoder_pulses_per_revolution*gear_reduction_ratio*pulse/PI/wheel_diameter_mm;
 }
 

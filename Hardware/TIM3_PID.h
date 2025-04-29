@@ -33,5 +33,6 @@ void PID_Sim_Update(PID_t *p);
 void TIM3_PID_Init(void);
 float TIM3_PID_Limit(float x, float min, float max);
 void Update_Speed_By_Position(float outer_out, float error_pos);
-void TIM3_PID_Locate(float Actual_Location);
+float TIM3_PID_Locate(float Actual_Location);
+
 #endif
