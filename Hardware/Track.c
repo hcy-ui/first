@@ -27,9 +27,9 @@ void Track_Init(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-/// @brief 
-/// @param  
-/// @return 
+/// @brief 循迹权重计算
+/// @param  无
+/// @return 无
 float Track_Calculate_Error(void)
 {
     int weight[8] = {-3, -2, -1, -0.5, 0.5, 1, 2, 3};
