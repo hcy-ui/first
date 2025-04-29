@@ -181,21 +181,31 @@ int main(void)
 	while (1)
 	{
 
-		if (OLED_Update_Flag) 
+		if (OLED_Update_Flag)
 		{
-			OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Inner_Left.Kp);
-			OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Inner_Left.Ki);
-			OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Inner_Left.Kd);
-			OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Inner_Left.Target);
-	
+			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Inner_Left.Kp);
+			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Inner_Left.Ki);
+			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Inner_Left.Kd);
+			// OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Inner_Left.Target);
+
+			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
+			// OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
+			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
+			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
+
+			OLED_Printf(0, 0, OLED_8X16, "LL:%4.2f", Location_Left);
+			OLED_Printf(0, 16, OLED_8X16, "LR:%4.2f", Location_Right);
+			OLED_Printf(0, 32, OLED_8X16, "LA:%4.2f", OOuter.Actual);
+			OLED_Printf(0, 48, OLED_8X16, "Er:%+04.0f", error_pos);
+
 			OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
 			OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
-			OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
-			OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
-	
+			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
+			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
+
 			OLED_Update();
-	
-			OLED_Update_Flag = 0;  // 清除标志位
+
+			OLED_Update_Flag = 0; // 清除标志位
 		}
 		// Inner_Left.Kp = RP_GetValue(1) / 4095.0 * 5;//内环速度控制
 		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
@@ -207,14 +217,11 @@ int main(void)
 		// Inner_Right.Kd = Inner_Left.Kd;
 		Inner_Right.Target = Inner_Left.Target;
 
-
 		OOuter.Target = TIM3_PID_Locate(600);
 		// OOuter.Target = RP_GetValue(1) / 4095.0 * 5;//外环位置控制
 		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
 		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
 		// Inner_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
-
-
 
 		// OLED_Printf(0, 38, OLED_8X16, "%4d", USART3_Serial_RxData);
 		// OLED_Update();
@@ -248,7 +255,7 @@ void TIM3_IRQHandler(void)
 		if (Count1 >= 10) // 内环（速度+灰度）
 		{
 			Count1 = 0;
-			OLED_Update_Flag=1;//OLED刷新标志位（每10ms刷新一下OLED显示）
+			OLED_Update_Flag = 1; // OLED刷新标志位（每10ms刷新一下OLED显示）
 
 			Speed_Right = -TIM2_Encoder_Get();
 			Speed_Left = TIM4_Encoder_Get();
@@ -269,14 +276,14 @@ void TIM3_IRQHandler(void)
 			Inner_Left.Speed = Inner_Left.Target + track_out;
 			Inner_Right.Speed = Inner_Right.Target - track_out; // 速度校准
 
-			Inner_Left.Actual = Speed_Left; // 速度环（左）
+			Inner_Left.Actual = Speed_Left;	  // 速度环（左）
 			Inner_Right.Actual = Speed_Right; // 速度环（右）
 
-			Inner_Left.Target = Inner_Left.Speed;//左
+			Inner_Left.Target = Inner_Left.Speed; // 左
 			PID_Sim_Update(&Inner_Left);
 			out_left = Inner_Left.Out;
 
-			Inner_Right.Target = Inner_Right.Speed;//右
+			Inner_Right.Target = Inner_Right.Speed; // 右
 			PID_Sim_Update(&Inner_Right);
 			out_right = Inner_Right.Out;
 
@@ -287,11 +294,11 @@ void TIM3_IRQHandler(void)
 		// if(Count2 >= 10)
 		// {
 		// 	Count2 = 0;
-			
+
 		// }
 		// }
 		Count4++;
-		if (Count4 >= 100)//外环（位置）
+		if (Count4 >= 100) // 外环（位置）
 		{
 			Count4 = 0;
 
@@ -301,9 +308,7 @@ void TIM3_IRQHandler(void)
 
 			error_pos = OOuter.Target - OOuter.Actual;
 			Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
-
 		}
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
-
 }
