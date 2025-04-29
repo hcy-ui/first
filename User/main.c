@@ -183,23 +183,23 @@ int main(void)
 
 		if (OLED_Update_Flag)
 		{
-			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Inner_Left.Kp);
-			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Inner_Left.Ki);
-			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Inner_Left.Kd);
-			// OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Inner_Left.Target);
-
-			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
-			// OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
-			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
-			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
-
-			OLED_Printf(0, 0, OLED_8X16, "LL:%4.2f", Location_Left);
-			OLED_Printf(0, 16, OLED_8X16, "LR:%4.2f", Location_Right);
-			OLED_Printf(0, 32, OLED_8X16, "LA:%4.2f", OOuter.Actual);
-			OLED_Printf(0, 48, OLED_8X16, "Er:%+04.0f", error_pos);
+			OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Inner_Left.Kp);
+			OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Inner_Left.Ki);
+			OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Inner_Left.Kd);
+			OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Inner_Left.Target);
 
 			OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
 			OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
+			OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
+			OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
+
+			// OLED_Printf(0, 0, OLED_8X16, "LL:%4.2f", Location_Left);
+			// OLED_Printf(0, 16, OLED_8X16, "LR:%4.2f", Location_Right);
+			// OLED_Printf(0, 32, OLED_8X16, "LA:%4.2f", OOuter.Actual);
+			// OLED_Printf(0, 48, OLED_8X16, "Er:%+04.0f", error_pos);
+
+			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
+			// OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
 			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
 			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
 
@@ -217,7 +217,7 @@ int main(void)
 		// Inner_Right.Kd = Inner_Left.Kd;
 		Inner_Right.Target = Inner_Left.Target;
 
-		OOuter.Target = TIM3_PID_Locate(600);
+		// OOuter.Target = TIM3_PID_Locate(600);
 		// OOuter.Target = RP_GetValue(1) / 4095.0 * 5;//外环位置控制
 		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
 		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
@@ -297,18 +297,18 @@ void TIM3_IRQHandler(void)
 
 		// }
 		// }
-		Count4++;
-		if (Count4 >= 100) // 外环（位置）
-		{
-			Count4 = 0;
+		// Count4++;
+		// if (Count4 >= 100) // 外环（位置）
+		// {
+		// 	Count4 = 0;
 
-			OOuter.Actual = (Location_Left + Location_Right) / 2;
+		// 	OOuter.Actual = (Location_Left + Location_Right) / 2;
 
-			PID_Sim_Update(&OOuter);
+		// 	PID_Sim_Update(&OOuter);
 
-			error_pos = OOuter.Target - OOuter.Actual;
-			Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
-		}
+		// 	error_pos = OOuter.Target - OOuter.Actual;
+		// 	Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
+		// }
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
 }
