@@ -35,7 +35,7 @@ PID_t Inner_Left = {
 	.Ki = 0.4,
 	.Kd = 0,
 
-	.Target = 30,
+	.Target = 0,
 	.Actual = 0,
 	.Out = 0,
 
@@ -57,7 +57,7 @@ PID_t Inner_Right = {
 	.Ki = 0.4,
 	.Kd = 0,
 
-	.Target = 30,
+	.Target = 0,
 	.Actual = 0,
 	.Out = 0,
 
@@ -95,7 +95,7 @@ PID_t OOuter = {
 
 // 内环灰度环
 PID_t Track_PID = {
-	.Kp = 0,
+	.Kp = 0.1,
 	.Ki = 0,
 	.Kd = 0,
 
@@ -138,8 +138,7 @@ int main(void)
 	// OLED_Printf(32, 0, OLED_8X16, "%4d", 123);
 	// OLED_Update();
 
-	TIM1_Motor_Init();
-	// TIM1_Motor_SetSpeed(100, 100);
+	// TIM1_Motor_Init();
 
 	TIM2_Encoder_Init();
 	TIM4_Encoder_Init();
@@ -182,6 +181,7 @@ int main(void)
 
 	while (1)
 	{
+		Trck_Read();
 
 		if (OLED_Update_Flag)
 		{ /*********内环速度环******************/
@@ -197,16 +197,26 @@ int main(void)
 			/*************内环速度环**************/
 
 			/*********内环灰度环******************/
-			OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Track_PID.Kp);
-			OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Track_PID.Ki);
-			OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Track_PID.Kd);
-			OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Track_PID.Target);
+			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Track_PID.Kp);
+			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Track_PID.Ki);
+			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Track_PID.Kd);
+			// OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", error);
 
-			OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
-			OLED_Printf(64, 16, OLED_8X16, "SLT:%04.0f", Inner_Left.Target);
-			OLED_Printf(64, 32, OLED_8X16, "SR:%04d", Speed_Right);
-			OLED_Printf(64, 48, OLED_8X16, "SRT:%04.0f", Inner_Right.Target);
+			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", -Speed_Left);
+			// OLED_Printf(64, 16, OLED_8X16, "SLT:%04.0f", Inner_Left.Target);
+			// OLED_Printf(64, 32, OLED_8X16, "SR:%04d", -Speed_Right);
+			// OLED_Printf(64, 48, OLED_8X16, "SRT:%04.0f", Inner_Right.Target);
 			/*************内环灰度环**************/
+
+			OLED_Printf(0, 0, OLED_8X16, "Kp:%d", Gray1);
+			OLED_Printf(0, 16, OLED_8X16, "Ki:%d", Gray2);
+			OLED_Printf(0, 32, OLED_8X16, "Kd:%d", Gray3);
+			OLED_Printf(0, 48, OLED_8X16, "Ta:%d", Gray4);
+
+			OLED_Printf(64, 0, OLED_8X16, "SL:%d", Gray5);
+			OLED_Printf(64, 16, OLED_8X16, "SLT:%d", Gray6);
+			OLED_Printf(64, 32, OLED_8X16, "SR:%d", Gray7);
+			OLED_Printf(64, 48, OLED_8X16, "SRT:%d", Gray8);
 
 			/*********外环位置环******************/
 			// OLED_Printf(0, 0, OLED_8X16, "LL:%4.2f", Location_Left);
@@ -224,6 +234,12 @@ int main(void)
 
 			OLED_Update_Flag = 0; // 清除标志位
 		}
+
+		Track_PID.Kp = RP_GetValue(1) / 4095.0 * 5; // 内环循迹控制
+		Track_PID.Ki = RP_GetValue(3) / 4095.0 * 2;
+		Track_PID.Kd = RP_GetValue(4) / 4095.0 * 2;
+		// Track_PID.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
+
 		// Inner_Left.Kp = RP_GetValue(1) / 4095.0 * 5;//内环速度控制
 		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
 		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
@@ -274,43 +290,43 @@ void TIM3_IRQHandler(void)
 			Count1 = 0;
 			OLED_Update_Flag = 1; // OLED刷新标志位（每10ms刷新一下OLED显示）
 
-			Speed_Right = -TIM2_Encoder_Get();
 			Speed_Left = TIM4_Encoder_Get();
+			Speed_Right = -TIM2_Encoder_Get();
 			Location_Left += Speed_Left;
 			Location_Right += Speed_Right; // 获取速度and位置
 
+			/*********速度PID******************/
+			Inner_Left.Actual = -Speed_Left;   // 速度环（左）
+			Inner_Right.Actual = -Speed_Right; // 速度环（右）
+
+			// Inner_Left.Target = Inner_Left.Speed; // 左
+			PID_Sim_Update(&Inner_Left);
+			out_left = Inner_Left.Out;
+
+			// Inner_Right.Target = Inner_Right.Speed; // 右
+			PID_Sim_Update(&Inner_Right);
+			out_right = Inner_Right.Out;
+
+			TIM1_Motor_SetSpeed(-out_left, -out_right);
+			/*********速度PID******************/
+		}
+
+		Count2++;
+		if (Count2 >= 10)
+		{
+			Count2 = 0;
 			/*********灰度循迹******************/
 			error = Track_Calculate_Error();
 			Track_PID.Actual = error;
 			PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-			track_out = TIM3_PID_Limit(Track_PID.Out, -40, 40); // 限幅，防止方向大转
-			Inner_Left.Speed = Inner_Left.Target + track_out;
-			Inner_Right.Speed = Inner_Right.Target - track_out; // 速度校准
-			/*********灰度循迹******************/
-
-			/*********速度PID******************/
-			Inner_Left.Actual = Speed_Left;	  // 速度环（左）
-			Inner_Right.Actual = Speed_Right; // 速度环（右）
-
-			Inner_Left.Target = Inner_Left.Speed; // 左
-			PID_Sim_Update(&Inner_Left);
-			out_left = Inner_Left.Out;
-
-			Inner_Right.Target = Inner_Right.Speed; // 右
-			PID_Sim_Update(&Inner_Right);
-			out_right = Inner_Right.Out;
-
-			TIM1_Motor_SetSpeed(out_left, out_right);
-			/*********速度PID******************/
+			track_out = TIM3_PID_Limit(Track_PID.Out, -1.5, 1.5); // 限幅，防止方向大转
+															  // 利用灰度误差控制目标速度，使小车转向修正
+			Inner_Left.Target = 20 - track_out;				  // 左轮速度 = 基准速度 + 偏差修正
+			Inner_Right.Target = 23 + track_out;			  // 右轮速度 = 基准速度 - 偏差修正
+															  /*********灰度循迹******************/
 		}
 
-		// Count2++;
-		// if(Count2 >= 10)
-		// {
-		// 	Count2 = 0;
-
-		// }
 		// }
 		// Count4++;
 		// if (Count4 >= 100) // 外环（位置）

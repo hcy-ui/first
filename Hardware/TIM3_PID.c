@@ -74,7 +74,7 @@ void PID_Update(PID_t *p)
 	{
 		p->Out = p->OutMax;
 	}
-	else if (p->Out < p->OutMin)
+	if (p->Out < p->OutMin)
 	{
 		p->Out = p->OutMin;
 	}
@@ -120,7 +120,7 @@ void PID_Sim_Update(PID_t *p)
 	{
 		p->Out = p->OutMax;
 	}
-	else if (p->Out < p->OutMin)
+	if (p->Out < p->OutMin)
 	{
 		p->Out = p->OutMin;
 	}

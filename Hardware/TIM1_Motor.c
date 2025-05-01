@@ -27,6 +27,23 @@ void TIM1_Motor_Init(void) // 准确来说是PWM用的定时器一，这里直�
  */
 void TIM1_Motor_SetSpeed(int Motor_Left, int Motor_Right) // 满速100
 {
+	if(Motor_Left>100)
+	{
+		Motor_Left=100;
+	}
+	if(Motor_Right>100)
+	{
+		Motor_Right=100;
+	}
+	if(Motor_Left<-100)
+	{
+		Motor_Left=-100;
+	}
+	if(Motor_Right<-100)
+	{
+		Motor_Right=-100;
+	}
+
 	if (Motor_Left <= 0) // 如果设置正转的速度值
 	{
 		GPIO_SetBits(GPIOB, GPIO_Pin_12);	// PA4置高电平
