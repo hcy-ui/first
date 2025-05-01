@@ -1,7 +1,7 @@
 #include "stm32f10x.h" // Device header
 
 uint16_t Coe;
-uint8_t Gray1, Gray2, Gray3, Gray4, Gray5, Gray6, Gray7, Gray8;
+uint8_t Gray1 = 0, Gray2 = 0, Gray3 = 0, Gray4 = 0, Gray5 = 0, Gray6 = 0, Gray7 = 0, Gray8 = 0;
 
 /// @brief 八路循迹
 /// @param  无
@@ -29,7 +29,7 @@ void Track_Init(void)
 }
 
 /// @brief 读取灰度值（6和7不灵敏，要么全亮，要么不亮）
-/// @param  
+/// @param
 void Trck_Read(void)
 {
     if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0)
@@ -104,17 +104,17 @@ void Trck_Read(void)
 /// @return 无
 float Track_Calculate_Error(void)
 {
-    int weight[8] = {-2, -1, -0.5, 0, 0.5, 1, 1.5, 2};
+    float weight[8] = {-4, -2, -1.5, -1, 1, 1.5, 2, 4};//误差为负则偏右，误差为正则偏左
     uint8_t sensor[8];
 
-    sensor[0] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4);
-    sensor[1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5);
-    sensor[2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_6);
-    sensor[3] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7);
-    sensor[4] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0);
-    sensor[5] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1);
-    sensor[6] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_4);
-    sensor[7] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
+    sensor[0] = Gray1;
+    sensor[1] = Gray2;
+    sensor[2] = Gray3;
+    sensor[3] = Gray4;
+    sensor[4] = Gray5;
+    sensor[5] = Gray6;
+    sensor[6] = Gray7;
+    sensor[7] = Gray8;
 
     float error = 0;
     int count = 0;
