@@ -25,58 +25,98 @@
 int32_t Speed_Left, Speed_Right, Location_Left, Location_Right;
 uint8_t OLED_Update_Flag = 0;
 float out_left, out_right;
-float error_pos;
+float error_Left,error_Right;
 float Error, track_out;
 // int8_t menu2;
 
 // 左右内环速度环
-PID_t Inner_Left = {
-	.Kp = 4,
-	.Ki = 0.4,
+PID_t Speed_Control_Left = {
+	.Kp = 2,
+	.Ki = 0.1,
 	.Kd = 0,
 
-	.Target = 0,
+	.Target = 30,
 	.Actual = 0,
 	.Out = 0,
 
 	.Speed = 0,
 
-	.OutMax = 50,
-	.OutMin = -50,
+	.OutMax = 100,
+	.OutMin = -100,
 
 	.Error0 = 0,
 	.Error1 = 0,
 
 	.ErrorInt = 0,
-	.ErrorIntMax = 5000,
-	.ErrorIntMin = -5000,
+	.ErrorIntMax = 1000,
+	.ErrorIntMin = -1000,
 };
 
-PID_t Inner_Right = {
-	.Kp = 4,
-	.Ki = 0.4,
+PID_t Speed_Control_Right = {
+	.Kp = 2,
+	.Ki = 0.1,
 	.Kd = 0,
 
-	.Target = 0,
+	.Target = 30,
 	.Actual = 0,
 	.Out = 0,
 
 	.Speed = 0,
 
-	.OutMax = 50,
-	.OutMin = -50,
+	.OutMax = 100,
+	.OutMin = -100,
 
 	.Error0 = 0,
 	.Error1 = 0,
 	.ErrorInt = 0,
-	.ErrorIntMax = 5000,
-	.ErrorIntMin = -5000,
+	.ErrorIntMax = 1000,
+	.ErrorIntMin = -1000,
 };
 
-// 外环位置环
-PID_t OOuter = {
+// 左右外环位置环
+
+PID_t Position_Control_Left = {
 	.Kp = 0,
 	.Ki = 0,
+	.Kd = 0,
+
+	.Target = 0,
+	.Actual = 0,
+	.Out = 0,
+
+	.OutMax = 50,
+	.OutMin = -50,
+
+	.Error0 = 0,
+	.Error1 = 0,
+	.ErrorInt = 0,
+	.ErrorIntMax = 1000,
+	.ErrorIntMin = -1000,
+};
+
+PID_t Position_Control_Right = {
+	.Kp = 0,
+	.Ki = 0,
+	.Kd = 0,
+
+	.Target = 0,
+	.Actual = 0,
+	.Out = 0,
+
+	.OutMax = 50,
+	.OutMin = -50,
+
+	.Error0 = 0,
+	.Error1 = 0,
+	.ErrorInt = 0,
+	.ErrorIntMax = 1000,
+	.ErrorIntMin = -1000,
+};
+
+// 内环灰度环
+PID_t Track_PID = {
+	.Kp = 4.5,
+	.Ki = 0.01,
 	.Kd = 0,
 
 	.Target = 0,
@@ -89,28 +129,8 @@ PID_t OOuter = {
 	.Error0 = 0,
 	.Error1 = 0,
 	.ErrorInt = 0,
-	.ErrorIntMax = 20000,
-	.ErrorIntMin = -20000,
-};
-
-// 内环灰度环
-PID_t Track_PID = {
-	.Kp = 0,
-	.Ki = 0,
-	.Kd = 0,
-
-	.Target = 0,
-	.Actual = 0,
-	.Out = 0,
-
-	.OutMax = 50,
-	.OutMin = -50,
-
-	.Error0 = 0,
-	.Error1 = 0,
-	.ErrorInt = 0,
-	.ErrorIntMax = 5000,
-	.ErrorIntMin = -5000,
+	.ErrorIntMax = 1000,
+	.ErrorIntMin = -1000,
 };
 
 int main(void)
@@ -185,29 +205,28 @@ int main(void)
 
 		if (OLED_Update_Flag)
 		{ /*********内环速度环******************/
-			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Inner_Left.Kp);
-			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Inner_Left.Ki);
-			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Inner_Left.Kd);
-			// OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Inner_Left.Target);
+			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Speed_Control_Left.Kp);
+			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Speed_Control_Left.Ki);
+			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Speed_Control_Left.Kd);
+			// OLED_Printf(0, 48, OLED_8X16, "Ta:%+04.0f", Speed_Control_Left.Target);
 
 			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
 			// OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
-			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
-			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
+			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Speed_Control_Left.Out + Speed_Control_Right.Out) / 2);
+			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Speed_Control_Left.Actual + Speed_Control_Right.Actual) / 2);
 			/*************内环速度环**************/
 
 			/*********内环灰度环******************/
-			OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Track_PID.Kp);
-			OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Track_PID.Ki);
-			OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Track_PID.Kd);
-			OLED_Printf(0, 48, OLED_8X16, "%4.2f", track_out);
-			// OLED_Printf(0, 48, OLED_8X16, "Er:%4.2f", Error);
+			// OLED_Printf(0, 0, OLED_8X16, "Kp:%4.2f", Track_PID.Kp);
+			// OLED_Printf(0, 16, OLED_8X16, "Ki:%4.2f", Track_PID.Ki);
+			// OLED_Printf(0, 32, OLED_8X16, "Kd:%4.2f", Track_PID.Kd);
+			// OLED_Printf(0, 48, OLED_8X16, "%4.2f", track_out);
+			// // OLED_Printf(0, 48, OLED_8X16, "Er:%4.2f", Error);
 
-
-			OLED_Printf(64, 0, OLED_8X16, "SL:%04d", -Speed_Left);
-			OLED_Printf(64, 16, OLED_8X16, "SLT:%04.0f", Inner_Left.Target);
-			OLED_Printf(64, 32, OLED_8X16, "SR:%04d", -Speed_Right);
-			OLED_Printf(64, 48, OLED_8X16, "SRT:%04.0f", Inner_Right.Target);
+			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", -Speed_Left);
+			// OLED_Printf(64, 16, OLED_8X16, "SLT:%04.0f", Speed_Control_Left.Target);
+			// OLED_Printf(64, 32, OLED_8X16, "SR:%04d", -Speed_Right);
+			// OLED_Printf(64, 48, OLED_8X16, "SRT:%04.0f", Speed_Control_Right.Target);
 			/*************内环灰度环**************/
 
 			/*************灰度值读取测试**************/
@@ -225,13 +244,13 @@ int main(void)
 			/*********外环位置环******************/
 			// OLED_Printf(0, 0, OLED_8X16, "LL:%4.2f", Location_Left);
 			// OLED_Printf(0, 16, OLED_8X16, "LR:%4.2f", Location_Right);
-			// OLED_Printf(0, 32, OLED_8X16, "LA:%4.2f", OOuter.Actual);
-			// OLED_Printf(0, 48, OLED_8X16, "Er:%+04.0f", error_pos);
+			// OLED_Printf(0, 32, OLED_8X16, "LA:%4.2f", Position_Control_Right.Actual);
+			// OLED_Printf(0, 48, OLED_8X16, "Er:%+04.0f", error_Left);
 
 			// OLED_Printf(64, 0, OLED_8X16, "SL:%04d", Speed_Left);
 			// OLED_Printf(64, 16, OLED_8X16, "SR:%04d", Speed_Right);
-			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Inner_Left.Out + Inner_Right.Out) / 2);
-			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Inner_Left.Actual + Inner_Right.Actual) / 2);
+			// OLED_Printf(64, 32, OLED_8X16, "Out:%04.0f", (Speed_Control_Left.Out + Speed_Control_Right.Out) / 2);
+			// OLED_Printf(64, 48, OLED_8X16, "Act:%04.0f", (Speed_Control_Left.Actual + Speed_Control_Right.Actual) / 2);
 			/*********外环位置环******************/
 
 			OLED_Update();
@@ -239,26 +258,26 @@ int main(void)
 			OLED_Update_Flag = 0; // 清除标志位
 		}
 
-		Track_PID.Kp = RP_GetValue(1) / 4095.0 * 10; // 内环循迹控制
-		Track_PID.Ki = RP_GetValue(3) / 4095.0 * 2;
-		Track_PID.Kd = RP_GetValue(4) / 4095.0 * 2;
+		// Track_PID.Kp = RP_GetValue(1) / 4095.0 * 10; // 内环循迹控制
+		// Track_PID.Ki = RP_GetValue(3) / 4095.0 * 2;
+		// Track_PID.Kd = RP_GetValue(4) / 4095.0 * 2;
 		// Track_PID.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
 
-		// Inner_Left.Kp = RP_GetValue(1) / 4095.0 * 5;//内环速度控制
-		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
-		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
-		// Inner_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
+		// Speed_Control_Left.Kp = RP_GetValue(1) / 4095.0 * 5;//内环速度控制
+		// Speed_Control_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
+		// Speed_Control_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
+		// Speed_Control_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
 
-		// Inner_Right.Kp = Inner_Left.Kp;
-		// Inner_Right.Ki = Inner_Left.Ki;
-		// Inner_Right.Kd = Inner_Left.Kd;
-		// Inner_Right.Target = Inner_Left.Target;
+		// Speed_Control_Right.Kp = Speed_Control_Left.Kp;
+		// Speed_Control_Right.Ki = Speed_Control_Left.Ki;
+		// Speed_Control_Right.Kd = Speed_Control_Left.Kd;
+		// Speed_Control_Right.Target = Speed_Control_Left.Target;
 
-		// OOuter.Target = TIM3_PID_Locate(600);
-		// OOuter.Target = RP_GetValue(1) / 4095.0 * 5;//外环位置控制
-		// Inner_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
-		// Inner_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
-		// Inner_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
+		// Position_Control_Right.Target = TIM3_PID_Locate(600);
+		// Position_Control_Right.Target = RP_GetValue(1) / 4095.0 * 5;//外环位置控制
+		// Speed_Control_Left.Ki = RP_GetValue(3) / 4095.0 * 2;
+		// Speed_Control_Left.Kd = RP_GetValue(4) / 4095.0 * 2;
+		// Speed_Control_Left.Target = RP_GetValue(2) / 4095.0 * 310 - 155;
 
 		// OLED_Printf(0, 38, OLED_8X16, "%4d", USART3_Serial_RxData);
 		// OLED_Update();
@@ -289,6 +308,7 @@ void TIM3_IRQHandler(void)
 	{
 
 		Count1++;
+		/*********速度PID******************/
 		if (Count1 >= 10) // 内环（速度+灰度）
 		{
 			Count1 = 0;
@@ -299,61 +319,54 @@ void TIM3_IRQHandler(void)
 			Location_Left += Speed_Left;
 			Location_Right += Speed_Right; // 获取速度and位置
 
-			/*********速度PID******************/
-			Inner_Left.Actual = -Speed_Left;   // 速度环（左）
-			Inner_Right.Actual = -Speed_Right; // 速度环（右）
+			Speed_Control_Left.Actual = -Speed_Left;   // 速度环（左）
+			Speed_Control_Right.Actual = -Speed_Right; // 速度环（右）
 
-			// Inner_Left.Target = Inner_Left.Speed; // 左
-			PID_Sim_Update(&Inner_Left);
-			out_left = Inner_Left.Out;
+			PID_Sim_Update(&Speed_Control_Left);
+			out_left = Speed_Control_Left.Out;
 
-			// Inner_Right.Target = Inner_Right.Speed; // 右
-			PID_Sim_Update(&Inner_Right);
-			out_right = Inner_Right.Out;
+			PID_Sim_Update(&Speed_Control_Right);
+			out_right = Speed_Control_Right.Out;
 
-			if(out_left > 50||out_left  < -50)//防止速度失控
-			{
-				out_left = 0;
-				out_right = 0;
-			}
-			if(out_right > 50||out_right  < -50)//防止速度失控
-			{
-				out_left = 0;
-				out_right = 0;
-			}
-				TIM1_Motor_SetSpeed(-out_left, -out_right);
-			/*********速度PID******************/
+			TIM1_Motor_SetSpeed(-out_left, -out_right);
 		}
 
-		Count2++;
-		if (Count2 >= 10)
-		{
-			Count2 = 0;
-			/*********灰度循迹******************/
-			Error = Track_Calculate_Error();
-			Track_PID.Actual = Error;
-			PID_Sim_Update(&Track_PID); // 获取并计算误差
-
-			track_out = TIM3_PID_Limit(Track_PID.Out, -6, 6); // 限幅，防止方向大转
-															  // 利用灰度误差控制目标速度，使小车转向修正
-			Inner_Left.Target = 30 - track_out;				  // 左轮速度 = 基准速度 + 偏差修正
-			Inner_Right.Target = 30 + track_out;			  // 右轮速度 = 基准速度 - 偏差修正
-															  /*********灰度循迹******************/
-		}
-
-		// }
-		// Count4++;
-		// if (Count4 >= 100) // 外环（位置）
+		// Count2++;
+		// /*********灰度循迹******************/
+		// if (Count2 >= 10)
 		// {
-		// 	Count4 = 0;
+		// 	Count2 = 0;
+		// 	Error = Track_Calculate_Error();
+		// 	Track_PID.Actual = Error;
+		// 	PID_Sim_Update(&Track_PID); // 获取并计算误差
 
-		// 	OOuter.Actual = (Location_Left + Location_Right) / 2;
-
-		// 	PID_Sim_Update(&OOuter);
-
-		// 	error_pos = OOuter.Target - OOuter.Actual;
-		// 	Update_Speed_By_Position(OOuter.Out, error_pos); // 减速停下
+		// 	track_out = TIM3_PID_Limit(Track_PID.Out, -7, 7); // 限幅，防止方向大转
+		// 													  // 利用灰度误差控制目标速度，使小车转向修正
+		// 	Speed_Control_Left.Target = 30 - track_out;		  // 左轮速度 = 基准速度 + 偏差修正
+		// 	Speed_Control_Right.Target = 30 + track_out;	  // 右轮速度 = 基准速度 - 偏差修正
+		// 													  /*********灰度循迹******************/
 		// }
+
+		Count4++;
+		if (Count4 >= 100) // 外环（位置环）
+		{
+			Count4 = 0;
+
+			Position_Control_Left.Actual = Location_Left;
+			Position_Control_Right.Actual = Location_Right;
+
+			PID_Sim_Update(&Position_Control_Left);
+			PID_Sim_Update(&Position_Control_Right);
+
+			Speed_Control_Left.Target=Position_Control_Left.Out;
+			Speed_Control_Right.Target=Position_Control_Right.Out;
+			
+			error_Left = Position_Control_Left.Target - Position_Control_Left.Actual;
+			error_Right = Position_Control_Right.Target - Position_Control_Right.Actual;
+
+			// Update_Speed_By_Position(Position_Control_Left.Out, error_Left,0); // 减速停下
+			// Update_Speed_By_Position(Position_Control_Right.Out, error_Right,1); 
+		}
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
 }

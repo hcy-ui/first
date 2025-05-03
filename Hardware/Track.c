@@ -104,7 +104,7 @@ void Trck_Read(void)
 /// @return 无
 float Track_Calculate_Error(void)
 {
-    float weight[8] = {-4, -2, -1.5, -1, 1, 1.5, 2, 4};//误差为负则偏右，误差为正则偏左
+    float weight[8] = {-4, -2, -1.9, -0.5, 0.5, 1.9, 2, 4};//误差为负则偏右，误差为正则偏左
     uint8_t sensor[8];
 
     sensor[0] = Gray1;
@@ -133,3 +133,5 @@ float Track_Calculate_Error(void)
 
     return error / count;
 }
+
+

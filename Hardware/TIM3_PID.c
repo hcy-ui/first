@@ -184,30 +184,33 @@ float TIM3_PID_Limit(float x, float min, float max)
 	return x;
 }
 
-void Update_Speed_By_Position(float outer_out, float error_pos)
+void Update_Speed_By_Position(float outer_out, float error_pos, uint8_t wheel_id)
 {
-	float speed_cmd;
+    float speed_cmd;
 
-	if (abs(error_pos) < 10)
-	{
-		speed_cmd = 0;
-	}
-	else if (abs(error_pos) < 50)
-	{
-		speed_cmd = TIM3_PID_Limit(outer_out, -15, 15);
-	}
-	else if (abs(error_pos) < 100)
-	{
-		speed_cmd = TIM3_PID_Limit(outer_out, -30, 30);
-	}
-	else
-	{
-		speed_cmd = TIM3_PID_Limit(outer_out, -50, 50);
-	}
+    if (abs(error_pos) < 10)
+    {
+        speed_cmd = 0;
+    }
+    else if (abs(error_pos) < 50)
+    {
+        speed_cmd = TIM3_PID_Limit(outer_out, -15, 15);
+    }
+    else if (abs(error_pos) < 100)
+    {
+        speed_cmd = TIM3_PID_Limit(outer_out, -30, 30);
+    }
+    else
+    {
+        speed_cmd = TIM3_PID_Limit(outer_out, -50, 50);
+    }
 
-	Inner_Left.Target = speed_cmd;
-	Inner_Right.Target = speed_cmd;
+    if (wheel_id == 0)
+        Inner_Left.Target = speed_cmd;
+    else if (wheel_id == 1)
+        Inner_Right.Target = speed_cmd;
 }
+
 
 /// @brief 直接输入位置即可（单位：mm）
 /// @param Actual_Location 
