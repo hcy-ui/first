@@ -4,8 +4,8 @@
 #include "menu.h"
 #include "TIM2_4_ENCODER.h"
 
-extern PID_t Inner_Left;
-extern PID_t Inner_Right;
+extern PID_t Speed_Control_Left;
+extern PID_t Speed_Control_Right;
 extern PID_t OOuter;
 #define PI 3.14159265358979323846		 // 圆周率
 #define encoder_pulses_per_revolution 13.0 // 电机编码器线数
@@ -206,9 +206,9 @@ void Update_Speed_By_Position(float outer_out, float error_pos, uint8_t wheel_id
     }
 
     if (wheel_id == 0)
-        Inner_Left.Target = speed_cmd;
+	Speed_Control_Left.Target = speed_cmd;
     else if (wheel_id == 1)
-        Inner_Right.Target = speed_cmd;
+	Speed_Control_Right.Target = speed_cmd;
 }
 
 

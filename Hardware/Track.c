@@ -30,7 +30,7 @@ void Track_Init(void)
 
 /// @brief 读取灰度值（6和7不灵敏，要么全亮，要么不亮）
 /// @param
-void Trck_Read(void)
+void Track_Read(void)
 {
     if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0)
     {
